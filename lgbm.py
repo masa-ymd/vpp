@@ -36,7 +36,7 @@ seed0=2021
 params = {
     #'objective': 'rmse',
     'objective': 'regression',
-    'metric': 'l1',
+    'metric': 'mean_absolute_error',
     'boosting_type': 'gbdt',
     'max_depth': -1,
     'max_bin':100,
@@ -143,8 +143,8 @@ for fold, (trn_idx, val_idx) in enumerate(kf.split(X, y)):
     #print(f'Performance of the　prediction: , ABS: {res_abs}')
 
     #keep scores and models
-    print(f"best_score: {model.best_score}")
-    #scores += res_abs / 5
+    print(f"best_score: {model.best_score['valid_1']['l1']}")
+    scores += model.best_score['valid_1']['l1'] / 5
     models.append(model)
     print("*" * 100)
     importance_df = pd.DataFrame(model.feature_importance(importance_type='gain'),index=X_train.columns.values.tolist(),columns=['importance']).sort_values('importance', ascending=False)
@@ -154,7 +154,7 @@ for fold, (trn_idx, val_idx) in enumerate(kf.split(X, y)):
     model_name = f"{MODEL_DIR}/lgbm_model_{fold}.pkl"
     pickle.dump(model, open(model_name, 'wb'))
 
-#print(scores)
+print(scores)
 
 #for fold, model in enumerate(models):
 for fold in range(5):
