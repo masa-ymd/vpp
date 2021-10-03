@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 import lightgbm as lgbm
-from sklearn.model_selection import StratifiedKFold, KFold
+from sklearn.model_selection import StratifiedKFold, KFold, GroupKFold
 import pickle
 import warnings
 #warnings.filterwarnings('ignore')
@@ -17,17 +17,24 @@ if not os.path.exists(MODEL_DIR):
     os.makedirs(MODEL_DIR)
 
 # read data
-df_train = pd.read_csv(f"{DATA_DIR}/train.csv")
-df_test = pd.read_csv(f"{DATA_DIR}/test.csv")
+df_train = pd.read_csv(f"{DATA_DIR}/preprocessed_train.csv")
+#df_test = pd.read_csv(f"{DATA_DIR}/test.csv")
 
-X = df_train.drop(['id', 'breath_id', 'time_step', 'pressure'],axis=1)
+X = df_train.drop(['id', 'breath_id', 'pressure'], axis=1)
 y = df_train['pressure']
 
 print(X.head())
 print("---")
 print(y.head())
 
-catecorical_features = ['u_out']
+catecorical_features = [
+    'u_out', 
+    'R_5', 'R_20', 'R_50',
+    'C_10', 'C_20', 'C_50',
+    'R__C_20__10', 'R__C_20__20', 'R__C_20__50', 'R__C_50__10', 'R__C_50__20',
+    'R__C_50__50', 'R__C_5__10', 'R__C_5__20', 'R__C_5__50']
+
+X[catecorical_features] = X[catecorical_features].astype('category')
 
 #with open(f"{MODEL_DIR}/lgbm_best_params.pkl", mode='rb') as f:
 #    params = pickle.load(f)
@@ -98,13 +105,14 @@ def create_folds(data, num_splits,target):
 
 
 #df_train = create_folds(df_train, 5, 'target')
-kf = KFold(n_splits=5, random_state=seed0, shuffle=True)
+#kf = KFold(n_splits=5, random_state=seed0, shuffle=True)
+kf = GroupKFold(n_splits=5, random_state=seed0)
 
 oof = pd.DataFrame()                 # out-of-fold result
 models = []                          # models
 scores = 0.0                         # validation score
 
-for fold, (trn_idx, val_idx) in enumerate(kf.split(X, y)):
+for fold, (trn_idx, val_idx) in enumerate(kf.split(X, y, groups=X['breath_id'])):
 #for fold in range(5):
 
     print("Fold :", fold+1)
@@ -115,15 +123,17 @@ for fold, (trn_idx, val_idx) in enumerate(kf.split(X, y)):
     X_train, y_train = X.loc[trn_idx].copy(), y[trn_idx].copy()
     X_valid, y_valid = X.loc[val_idx].copy(), y[val_idx].copy()
 
-    X_train['u_out'] = X_train['u_out'].astype('category')
-    X_valid['u_out'] = X_valid['u_out'].astype('category')
+    #X_train['u_out'] = X_train['u_out'].astype('category')
+    #X_valid['u_out'] = X_valid['u_out'].astype('category')
     
     #RMSPE weight
-    weights = 1/np.square(y_train)
-    lgbm_train = lgbm.Dataset(X_train,y_train,weight = weights, categorical_feature = catecorical_features)
+    #weights = 1/np.square(y_train)
+    #lgbm_train = lgbm.Dataset(X_train,y_train,weight = weights, categorical_feature = catecorical_features)
+    lgbm_train = lgbm.Dataset(X_train, y_train, categorical_feature = catecorical_features)
 
-    weights = 1/np.square(y_valid)
-    lgbm_valid = lgbm.Dataset(X_valid,y_valid,reference = lgbm_train,weight = weights, categorical_feature = catecorical_features)
+    #weights = 1/np.square(y_valid)
+    #lgbm_valid = lgbm.Dataset(X_valid,y_valid,reference = lgbm_train,weight = weights, categorical_feature = catecorical_features)
+    lgbm_valid = lgbm.Dataset(X_valid, y_valid, reference = lgbm_train, categorical_feature = catecorical_features)
     
     # model 
     model = lgbm.train(params=params,
