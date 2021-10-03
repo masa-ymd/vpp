@@ -20,7 +20,7 @@ if not os.path.exists(MODEL_DIR):
 df_train = pd.read_csv(f"{DATA_DIR}/preprocessed_train.csv")
 #df_test = pd.read_csv(f"{DATA_DIR}/test.csv")
 
-X = df_train.drop(['id', 'breath_id', 'pressure'], axis=1)
+X = df_train.drop(['id', 'pressure'], axis=1)
 y = df_train['pressure']
 
 print(X.head())
@@ -106,7 +106,7 @@ def create_folds(data, num_splits,target):
 
 #df_train = create_folds(df_train, 5, 'target')
 #kf = KFold(n_splits=5, random_state=seed0, shuffle=True)
-kf = GroupKFold(n_splits=5, random_state=seed0)
+kf = GroupKFold(n_splits=5)
 
 oof = pd.DataFrame()                 # out-of-fold result
 models = []                          # models
@@ -122,6 +122,9 @@ for fold, (trn_idx, val_idx) in enumerate(kf.split(X, y, groups=X['breath_id']))
     #X_valid, y_valid = X.loc[X['kfold']==fold].copy(), y.loc[X['kfold']==fold].copy()
     X_train, y_train = X.loc[trn_idx].copy(), y[trn_idx].copy()
     X_valid, y_valid = X.loc[val_idx].copy(), y[val_idx].copy()
+
+    X_train = X_train.drop(['breath_id'], axis=1)
+    X_valid = X_valid.drop(['breath_id'], axis=1)
 
     #X_train['u_out'] = X_train['u_out'].astype('category')
     #X_valid['u_out'] = X_valid['u_out'].astype('category')
