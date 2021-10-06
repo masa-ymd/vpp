@@ -142,9 +142,9 @@ for fold, (trn_idx, val_idx) in enumerate(kf.split(X, y, groups=X['breath_id']))
     model = lgbm.train(params=params,
                       train_set=lgbm_train,
                       valid_sets=[lgbm_train, lgbm_valid],
-                      num_boost_round=5000,         
+                      num_boost_round=1000,         
                       #feval=feval_abs,
-                      verbose_eval=10,
+                      verbose_eval=100,
                       categorical_feature = catecorical_features,
                       early_stopping_rounds = 50,    
                      )
