@@ -45,6 +45,7 @@ params = {
     'objective': 'regression',
     'metric': 'mean_absolute_error',
     'boosting_type': 'gbdt',
+    'learning_rate': 0.25
     'max_depth': -1,
     'max_bin':100,
     'min_data_in_leaf':500,
