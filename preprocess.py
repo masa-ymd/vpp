@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 
+pd.set_option('display.max_rows', None)
+
 DATA_DIR = "/root/kaggle/ventilator-pressure-prediction/data"
 
 df_train = pd.read_csv(f"{DATA_DIR}/train.csv")
@@ -88,5 +90,6 @@ df_train['cross2'] = df_train['time_step'] * df_train['u_out']
 
 print(df_train)
 print(df_train.columns.values.tolist())
+print(df_train.isnull().all())
 
 df_train.to_csv(f"{DATA_DIR}/preprocessed_train.csv", index=False)
