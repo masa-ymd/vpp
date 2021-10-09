@@ -13,6 +13,10 @@ from sklearn.preprocessing import RobustScaler, normalize
 from sklearn.model_selection import train_test_split, GroupKFold, KFold
 
 DATA_DIR = "/root/kaggle/ventilator-pressure-prediction/data"
+MODEL_DIR = "/root/kaggle/ventilator-pressure-prediction/lstm_models"
+
+if not os.path.exists(MODEL_DIR):
+    os.makedirs(MODEL_DIR)
 
 train = pd.read_csv(f"{DATA_DIR}/preprocessed_train.csv")
 targets = train[['pressure']].to_numpy().reshape(-1, 80)
@@ -61,6 +65,8 @@ with gpu_strategy.scope():
             options=None
         )
         model.fit(X_train, y_train, validation_data=(X_valid, y_valid), epochs=EPOCH, batch_size=BATCH_SIZE, callbacks=[lr, es, sv])
+
+        model.save(f"{MODEL_DIR}/lstm_model_{fold}.h5")
         test_preds.append(model.predict(test, batch_size=BATCH_SIZE, verbose=2).squeeze().reshape(-1, 1).squeeze())
 
 print(np.mean(test_preds, axis=1))
