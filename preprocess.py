@@ -5,6 +5,9 @@ DATA_DIR = "/root/kaggle/ventilator-pressure-prediction/data"
 
 df_train = pd.read_csv(f"{DATA_DIR}/train.csv")
 
+df_train['area'] = df_train['time_step'] * df['u_in']
+df_train['area'] = df_train.groupby('breath_id')['area'].cumsum()
+
 # rewritten calculation of lag features from this notebook: https://www.kaggle.com/patrick0302/add-lag-u-in-as-new-feat
 # some of ideas from this notebook: https://www.kaggle.com/mst8823/google-brain-lightgbm-baseline
 df_train['last_value_u_in'] = df_train.groupby('breath_id')['u_in'].transform('last')
