@@ -9,7 +9,7 @@ df_train = pd.read_csv(f"{DATA_DIR}/train.csv")
 
 #df_train['area'] = df_train['time_step'] * df['u_in']
 df_train['delta_time'] = df_train['time_step'].shift(-1, fill_value=0) - df_train['time_step']
-df_train['area'] = df_train['delta_time'] * df['u_in']
+df_train['area'] = df_train['delta_time'] * df_train['u_in']
 #df_train['area'] = df_train.groupby('breath_id')['area'].cumsum()
 
 # rewritten calculation of lag features from this notebook: https://www.kaggle.com/patrick0302/add-lag-u-in-as-new-feat
