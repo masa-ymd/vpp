@@ -128,6 +128,6 @@ with gpu_strategy.scope():
         model.fit(X_train, y_train, validation_data=(X_valid, y_valid), epochs=EPOCH, batch_size=BATCH_SIZE, callbacks=[lr, es, sv])
 
         model.save(f"{MODEL_DIR}/lstm_model_{fold}.h5")
-        test_preds.append(model.predict(test, batch_size=BATCH_SIZE, verbose=2).squeeze().reshape(-1, 1).squeeze())
+        #test_preds.append(model.predict(test, batch_size=BATCH_SIZE, verbose=2).squeeze().reshape(-1, 1).squeeze())
 
-print(np.mean(test_preds, axis=1))
+#print(np.mean(test_preds, axis=1))
