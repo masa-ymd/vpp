@@ -57,7 +57,7 @@ train = train.reshape(-1, 80, train.shape[-1])
 
 EPOCH = 300
 BATCH_SIZE = 1024
-NUM_FOLDS = 10
+NUM_FOLDS = 5
 
 gpu_strategy = tf.distribute.get_strategy()
 
