@@ -7,104 +7,110 @@ DATA_DIR = "/root/kaggle/ventilator-pressure-prediction/data"
 
 df_train = pd.read_csv(f"{DATA_DIR}/train.csv")
 
-#df_train['area'] = df_train['time_step'] * df['u_in']
-df_train['delta_time'] = df_train['time_step'].shift(-1, fill_value=0) - df_train['time_step']
-df_train['area'] = df_train['delta_time'] * df_train['u_in']
-#df_train['area'] = df_train.groupby('breath_id')['area'].cumsum()
+def add_features(df): 
 
-print("1")
+    #df['area'] = df['time_step'] * df['u_in']
+    df['delta_time'] = df['time_step'].shift(-1, fill_value=0) - df['time_step']
+    df['area'] = df['delta_time'] * df['u_in']
+    #df['area'] = df.groupby('breath_id')['area'].cumsum()
 
-# rewritten calculation of lag features from this notebook: https://www.kaggle.com/patrick0302/add-lag-u-in-as-new-feat
-# some of ideas from this notebook: https://www.kaggle.com/mst8823/google-brain-lightgbm-baseline
-df_train['last_value_u_in'] = df_train.groupby('breath_id')['u_in'].transform('last')
-df_train['u_in_lag1'] = df_train.groupby('breath_id')['u_in'].shift(1, fill_value=0)
-df_train['u_out_lag1'] = df_train.groupby('breath_id')['u_out'].shift(1, fill_value=0)
-df_train['u_in_lag_back1'] = df_train.groupby('breath_id')['u_in'].shift(-1, fill_value=0)
-df_train['u_out_lag_back1'] = df_train.groupby('breath_id')['u_out'].shift(-1, fill_value=0)
-df_train['u_in_lag2'] = df_train.groupby('breath_id')['u_in'].shift(2, fill_value=0)
-df_train['u_out_lag2'] = df_train.groupby('breath_id')['u_out'].shift(2, fill_value=0)
-df_train['u_in_lag_back2'] = df_train.groupby('breath_id')['u_in'].shift(-2, fill_value=0)
-df_train['u_out_lag_back2'] = df_train.groupby('breath_id')['u_out'].shift(-2, fill_value=0)
-df_train['u_in_lag3'] = df_train.groupby('breath_id')['u_in'].shift(3, fill_value=0)
-df_train['u_out_lag3'] = df_train.groupby('breath_id')['u_out'].shift(3, fill_value=0)
-df_train['u_in_lag_back3'] = df_train.groupby('breath_id')['u_in'].shift(-3, fill_value=0)
-df_train['u_out_lag_back3'] = df_train.groupby('breath_id')['u_out'].shift(-3, fill_value=0)
-df_train['u_in_lag4'] = df_train.groupby('breath_id')['u_in'].shift(4, fill_value=0)
-df_train['u_out_lag4'] = df_train.groupby('breath_id')['u_out'].shift(4, fill_value=0)
-df_train['u_in_lag_back4'] = df_train.groupby('breath_id')['u_in'].shift(-4, fill_value=0)
-df_train['u_out_lag_back4'] = df_train.groupby('breath_id')['u_out'].shift(-4, fill_value=0)
-#df_train = df_train.fillna(0)
+    print("1")
 
-print("2")
+    # rewritten calculation of lag features from this notebook: https://www.kaggle.com/patrick0302/add-lag-u-in-as-new-feat
+    # some of ideas from this notebook: https://www.kaggle.com/mst8823/google-brain-lightgbm-baseline
+    df['last_value_u_in'] = df.groupby('breath_id')['u_in'].transform('last')
+    df['u_in_lag1'] = df.groupby('breath_id')['u_in'].shift(1, fill_value=0)
+    df['u_out_lag1'] = df.groupby('breath_id')['u_out'].shift(1, fill_value=0)
+    df['u_in_lag_back1'] = df.groupby('breath_id')['u_in'].shift(-1, fill_value=0)
+    df['u_out_lag_back1'] = df.groupby('breath_id')['u_out'].shift(-1, fill_value=0)
+    df['u_in_lag2'] = df.groupby('breath_id')['u_in'].shift(2, fill_value=0)
+    df['u_out_lag2'] = df.groupby('breath_id')['u_out'].shift(2, fill_value=0)
+    df['u_in_lag_back2'] = df.groupby('breath_id')['u_in'].shift(-2, fill_value=0)
+    df['u_out_lag_back2'] = df.groupby('breath_id')['u_out'].shift(-2, fill_value=0)
+    df['u_in_lag3'] = df.groupby('breath_id')['u_in'].shift(3, fill_value=0)
+    df['u_out_lag3'] = df.groupby('breath_id')['u_out'].shift(3, fill_value=0)
+    df['u_in_lag_back3'] = df.groupby('breath_id')['u_in'].shift(-3, fill_value=0)
+    df['u_out_lag_back3'] = df.groupby('breath_id')['u_out'].shift(-3, fill_value=0)
+    df['u_in_lag4'] = df.groupby('breath_id')['u_in'].shift(4, fill_value=0)
+    df['u_out_lag4'] = df.groupby('breath_id')['u_out'].shift(4, fill_value=0)
+    df['u_in_lag_back4'] = df.groupby('breath_id')['u_in'].shift(-4, fill_value=0)
+    df['u_out_lag_back4'] = df.groupby('breath_id')['u_out'].shift(-4, fill_value=0)
+    #df = df.fillna(0)
 
-# max value of u_in and u_out for each breath
-df_train['u_in_max'] = df_train.groupby(['breath_id'])['u_in'].transform('max')
-df_train['u_out_max'] = df_train.groupby(['breath_id'])['u_out'].transform('max')
-df_train['u_in_min'] = df_train.groupby(['breath_id'])['u_in'].transform('min')
-df_train['u_out_min'] = df_train.groupby(['breath_id'])['u_out'].transform('min')
+    print("2")
 
-print("3")
+    # max value of u_in and u_out for each breath
+    df['u_in_max'] = df.groupby(['breath_id'])['u_in'].transform('max')
+    df['u_out_max'] = df.groupby(['breath_id'])['u_out'].transform('max')
+    df['u_in_min'] = df.groupby(['breath_id'])['u_in'].transform('min')
+    df['u_out_min'] = df.groupby(['breath_id'])['u_out'].transform('min')
 
-# difference between consequitive values
-df_train['u_in_diff1'] = df_train['u_in'] - df_train['u_in_lag1']
-df_train['u_in_diff_back1'] = df_train['u_in_lag_back1'] - df_train['u_in']
-df_train['u_out_diff1'] = df_train['u_out'] - df_train['u_out_lag1']
-df_train['u_in_diff2'] = df_train['u_in'] - df_train['u_in_lag2']
-df_train['u_in_diff_back2'] = df_train['u_in_lag_back2'] - df_train['u_in']
-df_train['u_out_diff2'] = df_train['u_out'] - df_train['u_out_lag2']
-df_train['u_in_diff3'] = df_train['u_in'] - df_train['u_in_lag3']
-df_train['u_in_diff_back3'] = df_train['u_in_lag_back3'] - df_train['u_in']
-df_train['u_out_diff3'] = df_train['u_out'] - df_train['u_out_lag3']
-df_train['u_in_diff4'] = df_train['u_in'] - df_train['u_in_lag4']
-df_train['u_in_diff_back4'] = df_train['u_in_lag_back4'] - df_train['u_in']
-df_train['u_out_diff4'] = df_train['u_out'] - df_train['u_out_lag4']
-# from here: https://www.kaggle.com/yasufuminakama/ventilator-pressure-lstm-starter
-df_train.loc[df_train['time_step'] == 0, 'u_in_diff1'] = 0
-df_train.loc[df_train['time_step'] == 0, 'u_in_diff_back1'] = 0
-df_train.loc[df_train['time_step'] == 0, 'u_out_diff1'] = 0
-df_train.loc[df_train['time_step'] == 0, 'u_in_diff2'] = 0
-df_train.loc[df_train['time_step'] == 0, 'u_in_diff_back2'] = 0
-df_train.loc[df_train['time_step'] == 0, 'u_out_diff2'] = 0
-df_train.loc[df_train['time_step'] == 0, 'u_in_diff3'] = 0
-df_train.loc[df_train['time_step'] == 0, 'u_in_diff_back3'] = 0
-df_train.loc[df_train['time_step'] == 0, 'u_out_diff3'] = 0
-df_train.loc[df_train['time_step'] == 0, 'u_in_diff4'] = 0
-df_train.loc[df_train['time_step'] == 0, 'u_in_diff_back4'] = 0
-df_train.loc[df_train['time_step'] == 0, 'u_out_diff4'] = 0
+    print("3")
 
-print("4")
+    # difference between consequitive values
+    df['u_in_diff1'] = df['u_in'] - df['u_in_lag1']
+    df['u_in_diff_back1'] = df['u_in_lag_back1'] - df['u_in']
+    df['u_out_diff1'] = df['u_out'] - df['u_out_lag1']
+    df['u_in_diff2'] = df['u_in'] - df['u_in_lag2']
+    df['u_in_diff_back2'] = df['u_in_lag_back2'] - df['u_in']
+    df['u_out_diff2'] = df['u_out'] - df['u_out_lag2']
+    df['u_in_diff3'] = df['u_in'] - df['u_in_lag3']
+    df['u_in_diff_back3'] = df['u_in_lag_back3'] - df['u_in']
+    df['u_out_diff3'] = df['u_out'] - df['u_out_lag3']
+    df['u_in_diff4'] = df['u_in'] - df['u_in_lag4']
+    df['u_in_diff_back4'] = df['u_in_lag_back4'] - df['u_in']
+    df['u_out_diff4'] = df['u_out'] - df['u_out_lag4']
+    # from here: https://www.kaggle.com/yasufuminakama/ventilator-pressure-lstm-starter
+    df.loc[df['time_step'] == 0, 'u_in_diff1'] = 0
+    df.loc[df['time_step'] == 0, 'u_in_diff_back1'] = 0
+    df.loc[df['time_step'] == 0, 'u_out_diff1'] = 0
+    df.loc[df['time_step'] == 0, 'u_in_diff2'] = 0
+    df.loc[df['time_step'] == 0, 'u_in_diff_back2'] = 0
+    df.loc[df['time_step'] == 0, 'u_out_diff2'] = 0
+    df.loc[df['time_step'] == 0, 'u_in_diff3'] = 0
+    df.loc[df['time_step'] == 0, 'u_in_diff_back3'] = 0
+    df.loc[df['time_step'] == 0, 'u_out_diff3'] = 0
+    df.loc[df['time_step'] == 0, 'u_in_diff4'] = 0
+    df.loc[df['time_step'] == 0, 'u_in_diff_back4'] = 0
+    df.loc[df['time_step'] == 0, 'u_out_diff4'] = 0
 
-df_train['area_abs'] = df_train['u_in_diff_back1'] * df_train['delta_time']
-df_train['uin_in_time'] = df_train['u_in_diff_back1'] / df_train['delta_time']
+    print("4")
 
-print("5")
+    df['area_abs'] = df['u_in_diff_back1'] * df['delta_time']
+    df['uin_in_time'] = df['u_in_diff_back1'] / df['delta_time']
 
-# difference between the current value of u_in/u_out and the max value within the breath
-df_train['u_in_diffmax'] = df_train.groupby(['breath_id'])['u_in'].transform('max') - df_train['u_in']
-df_train['u_in_diffmin'] = df_train.groupby(['breath_id'])['u_in'].transform('min') - df_train['u_in']
-df_train['u_in_diffmean'] = df_train.groupby(['breath_id'])['u_in'].transform('mean') - df_train['u_in']
-df_train['u_in_diffmean'] = df_train.groupby(['breath_id'])['u_in'].transform('median') - df_train['u_in']
+    print("5")
 
-print("6")
+    # difference between the current value of u_in/u_out and the max value within the breath
+    df['u_in_diffmax'] = df.groupby(['breath_id'])['u_in'].transform('max') - df['u_in']
+    df['u_in_diffmin'] = df.groupby(['breath_id'])['u_in'].transform('min') - df['u_in']
+    df['u_in_diffmean'] = df.groupby(['breath_id'])['u_in'].transform('mean') - df['u_in']
+    df['u_in_diffmean'] = df.groupby(['breath_id'])['u_in'].transform('median') - df['u_in']
 
-# OHE
-df_train['R__C'] = df_train["R"].astype(str) + '__' + df_train["C"].astype(str)
-df_train = df_train.merge(pd.get_dummies(df_train['R'], prefix='R'), left_index=True, right_index=True).drop(['R'], axis=1)
-df_train = df_train.merge(pd.get_dummies(df_train['C'], prefix='C'), left_index=True, right_index=True).drop(['C'], axis=1)
-df_train = df_train.merge(pd.get_dummies(df_train['R__C'], prefix='R__C'), left_index=True, right_index=True).drop(['R__C'], axis=1)
+    print("6")
 
-print("7")
+    # OHE
+    df['R__C'] = df["R"].astype(str) + '__' + df["C"].astype(str)
+    df = df.merge(pd.get_dummies(df['R'], prefix='R'), left_index=True, right_index=True).drop(['R'], axis=1)
+    df = df.merge(pd.get_dummies(df['C'], prefix='C'), left_index=True, right_index=True).drop(['C'], axis=1)
+    df = df.merge(pd.get_dummies(df['R__C'], prefix='R__C'), left_index=True, right_index=True).drop(['R__C'], axis=1)
 
-# https://www.kaggle.com/c/ventilator-pressure-prediction/discussion/273974
-df_train['u_in_cumsum'] = df_train.groupby(['breath_id'])['u_in'].cumsum()
-df_train['time_step_cumsum'] = df_train.groupby(['breath_id'])['time_step'].cumsum()
+    print("7")
 
-print("8")
+    # https://www.kaggle.com/c/ventilator-pressure-prediction/discussion/273974
+    df['u_in_cumsum'] = df.groupby(['breath_id'])['u_in'].cumsum()
+    df['time_step_cumsum'] = df.groupby(['breath_id'])['time_step'].cumsum()
 
-df_train['cross'] = df_train['u_in'] * df_train['u_out']
-df_train['cross2'] = df_train['time_step'] * df_train['u_out']
+    print("8")
 
-print("9")
+    df['cross'] = df['u_in'] * df['u_out']
+    df['cross2'] = df['time_step'] * df['u_out']
+
+    print("9")
+
+    return df
+
+df_train = add_features(df_train)
 
 print(df_train.head())
 print(df_train.columns.values.tolist())
