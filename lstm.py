@@ -80,8 +80,8 @@ targets = train[['pressure']].to_numpy().reshape(-1, 80)
 train.drop(['pressure', 'id', 'breath_id'], axis=1, inplace=True)
 
 # fillna
-for col in train.columns.to_list():
-    train[col] = train[col].fillna(train[col].mean())
+#for col in train.columns.to_list():
+#    train[col] = train[col].fillna(train[col].mean())
 
 RS = RobustScaler()
 train = RS.fit_transform(train)
