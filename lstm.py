@@ -41,6 +41,9 @@ except ValueError: # detect GPU(s) and enable mixed precision
     print('Mixed precision enabled')
 print("REPLICAS: ", strategy.num_replicas_in_sync)
 
+targets = train[['pressure']].to_numpy().reshape(-1, 80)
+train.drop(['pressure', 'id', 'breath_id'], axis=1, inplace=True)
+
 # fillna
 #for col in train.columns.to_list():
 #    train[col] = train[col].fillna(train[col].mean())
