@@ -16,9 +16,13 @@ from sklearn.model_selection import train_test_split, GroupKFold, KFold
 
 DATA_DIR = "/root/kaggle/ventilator-pressure-prediction/data"
 MODEL_DIR = "/root/kaggle/ventilator-pressure-prediction/lstm_models"
+CHECKPOINT_DIR = "/root/kaggle/ventilator-pressure-prediction/lstm_models/checkpoint"
 
 if not os.path.exists(MODEL_DIR):
     os.makedirs(MODEL_DIR)
+
+if not os.path.exists(CHECKPOINT_DIR):
+    os.makedirs(CHECKPOINT_DIR)
 
 train = pd.read_csv(f"{DATA_DIR}/preprocessed_train.csv")
 
@@ -72,7 +76,7 @@ with strategy.scope():
         X_train, X_valid = train[train_idx], train[test_idx]
         y_train, y_valid = targets[train_idx], targets[test_idx]
 
-        checkpoint_filepath = f"folds{fold}.hdf5"
+        checkpoint_filepath = f"{CHECKPOINT_DIR}/folds_{fold}.hdf5"
         model = keras.models.Sequential([
             keras.layers.Input(shape=train.shape[-2:]),
             keras.layers.Bidirectional(keras.layers.LSTM(1024, return_sequences=True)),
@@ -83,6 +87,10 @@ with strategy.scope():
             keras.layers.Dense(1),
             ])
         model.compile(optimizer="adam", loss="mae")
+
+        if os.path.exists(checkpoint_filepath):
+            print(f"load weights: {checkpoint_filepath}")
+            model.load_weights(checkpoint_filepath)
 
         lr = ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=10, verbose=1)
         es = EarlyStopping(monitor="val_loss", patience=60, verbose=1, mode="min", restore_best_weights=True)
