@@ -72,6 +72,10 @@ with strategy.scope():
     for fold, (train_idx, test_idx) in enumerate(kf.split(train, targets)):
         K.clear_session()
 
+        if os.path.exists(f"{MODEL_DIR}/lstm_model_{fold}.h5"):
+            print(f"{MODEL_DIR}/lstm_model_{fold}.h5 exists. skip fold {fold}")
+            continue
+
         print('-'*15, '>', f'Fold {fold+1}', '<', '-'*15)
         X_train, X_valid = train[train_idx], train[test_idx]
         y_train, y_valid = targets[train_idx], targets[test_idx]
