@@ -90,19 +90,13 @@ def add_features(df):
 
     print("Step-5...Completed")
 
-    df['one'] = 1
-    df['count'] = (df['one']).groupby(df['breath_id']).cumsum()
-    df['u_in_cummean'] =df['u_in_cumsum'] / df['count']
-
-    print("Step-6...Completed")
-
     # difference between the current value of u_in/u_out and the max value within the breath
     df['u_in_diffmax'] = df.groupby(['breath_id'])['u_in'].transform('max') - df['u_in']
     df['u_in_diffmin'] = df.groupby(['breath_id'])['u_in'].transform('min') - df['u_in']
     df['u_in_diffmean'] = df.groupby(['breath_id'])['u_in'].transform('mean') - df['u_in']
     df['u_in_diffmean'] = df.groupby(['breath_id'])['u_in'].transform('median') - df['u_in']
 
-    print("Step-7...Completed")
+    print("Step-6...Completed")
 
     df['breath_id_lag']=df['breath_id'].shift(1).fillna(0)
     df['breath_id_lag2']=df['breath_id'].shift(2).fillna(0)
@@ -113,7 +107,7 @@ def add_features(df):
     df['breath_id__u_in_lag2'] = df['u_in'].shift(2).fillna(0)
     df['breath_id__u_in_lag2'] = df['breath_id__u_in_lag2'] * df['breath_id_lag2same']
 
-    print("Step-8...Completed")
+    print("Step-7...Completed")
 
     # OHE
     df['R__C'] = df["R"].astype(str) + '__' + df["C"].astype(str)
@@ -121,7 +115,7 @@ def add_features(df):
     df = df.merge(pd.get_dummies(df['C'], prefix='C'), left_index=True, right_index=True).drop(['C'], axis=1)
     df = df.merge(pd.get_dummies(df['R__C'], prefix='R__C'), left_index=True, right_index=True).drop(['R__C'], axis=1)
 
-    print("Step-9...Completed")
+    print("Step-8...Completed")
 
     df['time_step_diff'] = df.groupby('breath_id')['time_step'].diff().fillna(0)
     df['ewm_u_in_mean'] = (df\
@@ -138,18 +132,21 @@ def add_features(df):
                                                                     "15_in_mean":"mean"})\
                                                                .reset_index(level=0,drop=True))
 
-    print("Step-10...Completed")
+    print("Step-9...Completed")
 
     # https://www.kaggle.com/c/ventilator-pressure-prediction/discussion/273974
     df['u_in_cumsum'] = df.groupby(['breath_id'])['u_in'].cumsum()
     df['time_step_cumsum'] = df.groupby(['breath_id'])['time_step'].cumsum()
+    df['one'] = 1
+    df['count'] = (df['one']).groupby(df['breath_id']).cumsum()
+    df['u_in_cummean'] = df['u_in_cumsum'] / df['count']
 
-    print("Step-11...Completed")
+    print("Step-10...Completed")
 
     df['cross'] = df['u_in'] * df['u_out']
     df['cross2'] = df['time_step'] * df['u_out']
 
-    print("Step-12...Completed")
+    print("Step-11...Completed")
 
     return df
 
