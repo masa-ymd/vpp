@@ -63,7 +63,7 @@ scaler_name = f"{MODEL_DIR}/scaler.pkl"
 with open(scaler_name, 'wb') as f:
     pickle.dump(RS, f)
 
-with open(scaler_name, 'wb') as f:
+with open(scaler_name, 'rb') as f:
     RS = pickle.load(f)
 train = RS.transform(train)
 
