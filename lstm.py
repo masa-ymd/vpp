@@ -133,7 +133,7 @@ with strategy.scope():
             model.load_weights(checkpoint_filepath)
 
         lr = ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=10, verbose=1)
-        es = EarlyStopping(monitor="val_loss", patience=60, verbose=1, mode="min", restore_best_weights=True)
+        es = EarlyStopping(monitor="val_loss", patience=30, verbose=1, mode="min", restore_best_weights=True)
         sv = keras.callbacks.ModelCheckpoint(
             checkpoint_filepath, monitor='val_loss', verbose=1, save_best_only=True,
             save_weights_only=False, mode='auto', save_freq='epoch',
