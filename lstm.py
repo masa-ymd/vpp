@@ -18,6 +18,7 @@ from sklearn.model_selection import train_test_split, GroupKFold, KFold
 DATA_DIR = "/root/kaggle/ventilator-pressure-prediction/data"
 MODEL_DIR = "/root/kaggle/ventilator-pressure-prediction/lstm_models"
 CHECKPOINT_DIR = "/root/kaggle/ventilator-pressure-prediction/lstm_models/checkpoint"
+B_SIZE = 94
 
 if not os.path.exists(MODEL_DIR):
     os.makedirs(MODEL_DIR)
@@ -26,6 +27,8 @@ if not os.path.exists(CHECKPOINT_DIR):
     os.makedirs(CHECKPOINT_DIR)
 
 train = pd.read_csv(f"{DATA_DIR}/preprocessed_train.csv")
+
+print(train.head())
 
 #train = pd.read_csv('/root/kaggle/ventilator-pressure-prediction/data/train.csv')
 
@@ -46,7 +49,7 @@ except ValueError: # detect GPU(s) and enable mixed precision
     print('Mixed precision enabled')
 print("REPLICAS: ", strategy.num_replicas_in_sync)
 
-targets = train[['pressure']].to_numpy().reshape(-1, 80)
+targets = train[['pressure']].to_numpy().reshape(-1, B_SIZE)
 #train.drop(['pressure', 'id', 'breath_id'], axis=1, inplace=True)
 train.drop(['pressure','id', 'breath_id','one','count',
             'breath_id_lag','breath_id_lag2','breath_id_lagsame',
@@ -67,7 +70,7 @@ with open(scaler_name, 'rb') as f:
     RS = pickle.load(f)
 train = RS.transform(train)
 
-train = train.reshape(-1, 80, train.shape[-1])
+train = train.reshape(-1, B_SIZE, train.shape[-1])
 #test = test.reshape(-1, 80, train.shape[-1])
 
 def dnn_model():
