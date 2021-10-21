@@ -7,7 +7,9 @@ DATA_DIR = "/root/kaggle/ventilator-pressure-prediction/data"
 
 df_train = pd.read_csv(f"{DATA_DIR}/train.csv")
 
-def add_features(df): 
+def add_features(df):
+
+    df = df.query('u_out != 1')
 
     df['area'] = df['time_step'] * df['u_in']
     df['delta_time'] = df['time_step'].shift(-1, fill_value=0) - df['time_step']
@@ -20,21 +22,21 @@ def add_features(df):
     # some of ideas from this notebook: https://www.kaggle.com/mst8823/google-brain-lightgbm-baseline
     df['last_value_u_in'] = df.groupby('breath_id')['u_in'].transform('last')
     df['u_in_lag1'] = df.groupby('breath_id')['u_in'].shift(1, fill_value=0)
-    df['u_out_lag1'] = df.groupby('breath_id')['u_out'].shift(1, fill_value=0)
+    #df['u_out_lag1'] = df.groupby('breath_id')['u_out'].shift(1, fill_value=0)
     df['u_in_lag_back1'] = df.groupby('breath_id')['u_in'].shift(-1, fill_value=0)
-    df['u_out_lag_back1'] = df.groupby('breath_id')['u_out'].shift(-1, fill_value=0)
+    #df['u_out_lag_back1'] = df.groupby('breath_id')['u_out'].shift(-1, fill_value=0)
     df['u_in_lag2'] = df.groupby('breath_id')['u_in'].shift(2, fill_value=0)
-    df['u_out_lag2'] = df.groupby('breath_id')['u_out'].shift(2, fill_value=0)
+    #df['u_out_lag2'] = df.groupby('breath_id')['u_out'].shift(2, fill_value=0)
     df['u_in_lag_back2'] = df.groupby('breath_id')['u_in'].shift(-2, fill_value=0)
-    df['u_out_lag_back2'] = df.groupby('breath_id')['u_out'].shift(-2, fill_value=0)
+    #df['u_out_lag_back2'] = df.groupby('breath_id')['u_out'].shift(-2, fill_value=0)
     df['u_in_lag3'] = df.groupby('breath_id')['u_in'].shift(3, fill_value=0)
-    df['u_out_lag3'] = df.groupby('breath_id')['u_out'].shift(3, fill_value=0)
+    #df['u_out_lag3'] = df.groupby('breath_id')['u_out'].shift(3, fill_value=0)
     df['u_in_lag_back3'] = df.groupby('breath_id')['u_in'].shift(-3, fill_value=0)
-    df['u_out_lag_back3'] = df.groupby('breath_id')['u_out'].shift(-3, fill_value=0)
+    #df['u_out_lag_back3'] = df.groupby('breath_id')['u_out'].shift(-3, fill_value=0)
     df['u_in_lag4'] = df.groupby('breath_id')['u_in'].shift(4, fill_value=0)
-    df['u_out_lag4'] = df.groupby('breath_id')['u_out'].shift(4, fill_value=0)
+    #df['u_out_lag4'] = df.groupby('breath_id')['u_out'].shift(4, fill_value=0)
     df['u_in_lag_back4'] = df.groupby('breath_id')['u_in'].shift(-4, fill_value=0)
-    df['u_out_lag_back4'] = df.groupby('breath_id')['u_out'].shift(-4, fill_value=0)
+    #df['u_out_lag_back4'] = df.groupby('breath_id')['u_out'].shift(-4, fill_value=0)
     df = df.fillna(0)
 
     print("Step-2...Completed")
@@ -54,20 +56,20 @@ def add_features(df):
     # difference between consequitive values
     df['u_in_diff1'] = df['u_in'] - df['u_in_lag1']
     df['u_in_diff_back1'] = df['u_in_lag_back1'] - df['u_in']
-    df['u_out_diff1'] = df['u_out'] - df['u_out_lag1']
-    df['u_out_diff_back1'] = df['u_out_lag_back1'] - df['u_out']
+    #df['u_out_diff1'] = df['u_out'] - df['u_out_lag1']
+    #df['u_out_diff_back1'] = df['u_out_lag_back1'] - df['u_out']
     df['u_in_diff2'] = df['u_in'] - df['u_in_lag2']
     df['u_in_diff_back2'] = df['u_in_lag_back2'] - df['u_in']
-    df['u_out_diff2'] = df['u_out'] - df['u_out_lag2']
-    df['u_out_diff_back2'] = df['u_out_lag_back2'] - df['u_out']
+    #df['u_out_diff2'] = df['u_out'] - df['u_out_lag2']
+    #df['u_out_diff_back2'] = df['u_out_lag_back2'] - df['u_out']
     df['u_in_diff3'] = df['u_in'] - df['u_in_lag3']
     df['u_in_diff_back3'] = df['u_in_lag_back3'] - df['u_in']
-    df['u_out_diff3'] = df['u_out'] - df['u_out_lag3']
-    df['u_out_diff_back3'] = df['u_out_lag_back3'] - df['u_out']
+    #df['u_out_diff3'] = df['u_out'] - df['u_out_lag3']
+    #df['u_out_diff_back3'] = df['u_out_lag_back3'] - df['u_out']
     df['u_in_diff4'] = df['u_in'] - df['u_in_lag4']
     df['u_in_diff_back4'] = df['u_in_lag_back4'] - df['u_in']
-    df['u_out_diff4'] = df['u_out'] - df['u_out_lag4']
-    df['u_out_diff_back4'] = df['u_out_lag_back4'] - df['u_out']
+    #df['u_out_diff4'] = df['u_out'] - df['u_out_lag4']
+    #df['u_out_diff_back4'] = df['u_out_lag_back4'] - df['u_out']
     # from here: https://www.kaggle.com/yasufuminakama/ventilator-pressure-lstm-starter
     df.fillna(0)
     #df.loc[df['time_step'] == 0, 'u_in_diff1'] = 0
@@ -143,10 +145,10 @@ def add_features(df):
 
     print("Step-10...Completed")
 
-    df['cross'] = df['u_in'] * df['u_out']
-    df['cross2'] = df['time_step'] * df['u_out']
+    #df['cross'] = df['u_in'] * df['u_out']
+    #df['cross2'] = df['time_step'] * df['u_out']
 
-    print("Step-11...Completed")
+    #print("Step-11...Completed")
 
     return df
 
