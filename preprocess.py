@@ -9,7 +9,7 @@ df_train = pd.read_csv(f"{DATA_DIR}/train.csv")
 
 def add_features(df):
 
-    df = df.query('u_out != 1')
+    df = df.loc[df['u_out'] != 1].copy()
 
     df['area'] = df['time_step'] * df['u_in']
     df['delta_time'] = df['time_step'].shift(-1, fill_value=0) - df['time_step']
