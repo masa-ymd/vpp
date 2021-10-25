@@ -10,6 +10,8 @@ import tensorflow.keras.backend as K
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.callbacks import LearningRateScheduler, ReduceLROnPlateau
 from tensorflow.keras.optimizers.schedules import ExponentialDecay
+from tensorflow.keras.layers import Input, Bidirectional, Dense, LSTM, GRU, Multiply, Concatenate, BatchNormalization
+from tensorflow.keras.models import Model
 
 from sklearn.metrics import mean_absolute_error as mae
 from sklearn.preprocessing import RobustScaler, normalize
@@ -18,7 +20,7 @@ from sklearn.model_selection import train_test_split, GroupKFold, KFold
 DATA_DIR = "/root/kaggle/ventilator-pressure-prediction/data"
 MODEL_DIR = "/root/kaggle/ventilator-pressure-prediction/lstm_models"
 CHECKPOINT_DIR = "/root/kaggle/ventilator-pressure-prediction/lstm_models/checkpoint"
-B_SIZE = 94
+B_SIZE = 80
 
 if not os.path.exists(MODEL_DIR):
     os.makedirs(MODEL_DIR)
@@ -75,21 +77,36 @@ train = train.reshape(-1, B_SIZE, train.shape[-1])
 
 def dnn_model():
     
-    x_input = keras.layers.Input(shape=(train.shape[-2:]))
+    x_input = Input(shape=(train.shape[-2:]))
     
-    x1 = keras.layers.Bidirectional(keras.layers.LSTM(units=768, return_sequences=True))(x_input)
-    x2 = keras.layers.Bidirectional(keras.layers.LSTM(units=512, return_sequences=True))(x1)
-    x3 = keras.layers.Bidirectional(keras.layers.LSTM(units=256, return_sequences=True))(x2)
+    x1 = Bidirectional(LSTM(units=768, return_sequences=True))(x_input)
+    x2 = Bidirectional(LSTM(units=512, return_sequences=True))(x1)
+    x3 = Bidirectional(LSTM(units=384, return_sequences=True))(x2)
+    x4 = Bidirectional(LSTM(units=256, return_sequences=True))(x3)
+    x5 = Bidirectional(LSTM(units=128, return_sequences=True))(x4)
     
-    z2 = keras.layers.Bidirectional(keras.layers.GRU(units=256, return_sequences=True))(x2)
-    z3 = keras.layers.Bidirectional(keras.layers.GRU(units=128, return_sequences=True))(keras.layers.Add()([x3, z2]))
+    z2 = Bidirectional(GRU(units=384, return_sequences=True))(x2)
     
-    x = keras.layers.Concatenate(axis=2)([x3, z2, z3])
-    x = keras.layers.Bidirectional(keras.layers.LSTM(units=192, return_sequences=True))(x)
+    z31 = Multiply()([x3, z2])
+    z31 = BatchNormalization()(z31)
+    z3 = Bidirectional(GRU(units=256, return_sequences=True))(z31)
     
-    x = keras.layers.Dense(units=128, activation='selu')(x)
+    z41 = Multiply()([x4, z3])
+    z41 = BatchNormalization()(z41)
+    z4 = Bidirectional(GRU(units=128, return_sequences=True))(z41)
     
-    x_output = keras.layers.Dense(units=1)(x)
+    z51 = Multiply()([x5, z4])
+    z51 = BatchNormalization()(z51)
+    z5 = Bidirectional(GRU(units=64, return_sequences=True))(z51)
+    
+    x = Concatenate(axis=2)([x5, z2, z3, z4, z5])
+    
+    x = Dense(units=128, activation='selu')(x)
+    
+    x_output = Dense(units=1)(x)
+
+    model = Model(inputs=x_input, outputs=x_output, 
+                  name='DNN_Model')
 
     model = keras.models.Model(inputs=x_input, outputs=x_output, name='DNN_Model')
     return model
