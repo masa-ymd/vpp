@@ -28,7 +28,7 @@ if not os.path.exists(MODEL_DIR):
 if not os.path.exists(CHECKPOINT_DIR):
     os.makedirs(CHECKPOINT_DIR)
 
-train = pd.read_csv(f"{DATA_DIR}/preprocessed_train.csv")
+train = pd.read_csv(f"{DATA_DIR}/preprocessed_train.csv.zip")
 
 print(train.head())
 
@@ -113,7 +113,7 @@ def dnn_model():
 
 EPOCH = 300
 BATCH_SIZE = 1024
-NUM_FOLDS = 5
+NUM_FOLDS = 10
 
 gpu_strategy = tf.distribute.get_strategy()
 
@@ -124,15 +124,15 @@ with strategy.scope():
     for fold, (train_idx, test_idx) in enumerate(kf.split(train, targets)):
         K.clear_session()
 
-        if os.path.exists(f"{MODEL_DIR}/lstm_model_{fold}.h5"):
-            print(f"{MODEL_DIR}/lstm_model_{fold}.h5 exists. skip fold {fold}")
+        if os.path.exists(f"{MODEL_DIR}/lstm_model_{fold+1}.h5"):
+            print(f"{MODEL_DIR}/lstm_model_{fold+1}.h5 exists. skip fold {fold+1}")
             continue
 
         print('-'*15, '>', f'Fold {fold+1}', '<', '-'*15)
         X_train, X_valid = train[train_idx], train[test_idx]
         y_train, y_valid = targets[train_idx], targets[test_idx]
 
-        checkpoint_filepath = f"{CHECKPOINT_DIR}/folds_{fold}.hdf5"
+        checkpoint_filepath = f"{CHECKPOINT_DIR}/folds_{fold+1}.hdf5"
         #model = keras.models.Sequential([
         #    keras.layers.Input(shape=train.shape[-2:]),
         #    keras.layers.Bidirectional(keras.layers.LSTM(1024, return_sequences=True)),
@@ -161,4 +161,5 @@ with strategy.scope():
         )
         model.fit(X_train, y_train, validation_data=(X_valid, y_valid), epochs=EPOCH, batch_size=BATCH_SIZE, callbacks=[lr, es, sv])
 
-        model.save(f"{MODEL_DIR}/lstm_model_{fold}.h5")
+        model.save(f"{MODEL_DIR}/lstm_model_{fold+1}.h5")
+
