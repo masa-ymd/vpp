@@ -119,7 +119,7 @@ gpu_strategy = tf.distribute.get_strategy()
 
 with strategy.scope():
 #with gpu_strategy.scope():
-    kf = KFold(n_splits=NUM_FOLDS, shuffle=True, random_state=2021)
+    kf = KFold(n_splits=NUM_FOLDS, shuffle=True, random_state=42)
     test_preds = []
     for fold, (train_idx, test_idx) in enumerate(kf.split(train, targets)):
         K.clear_session()
@@ -160,6 +160,5 @@ with strategy.scope():
             options=None
         )
         model.fit(X_train, y_train, validation_data=(X_valid, y_valid), epochs=EPOCH, batch_size=BATCH_SIZE, callbacks=[lr, es, sv])
-
         model.save(f"{MODEL_DIR}/lstm_model_{fold+1}.h5")
 
