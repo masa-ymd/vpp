@@ -51,7 +51,7 @@ except ValueError: # detect GPU(s) and enable mixed precision
     policy = tf.keras.mixed_precision.experimental.Policy('mixed_float16')
     tf.config.optimizer.set_jit(True) # XLA compilation
     tf.keras.mixed_precision.experimental.set_policy(policy)
-    BATCH_SIZE = 2048
+    BATCH_SIZE = 1024
     print('Mixed precision enabled')
 print("REPLICAS: ", strategy.num_replicas_in_sync)
 
@@ -157,7 +157,7 @@ with strategy.scope():
             model.load_weights(checkpoint_filepath)
 
         lr = ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=10, verbose=1)
-        es = EarlyStopping(monitor="val_loss", patience=30, verbose=1, mode="min", restore_best_weights=True)
+        es = EarlyStopping(monitor="val_loss", patience=20, verbose=1, mode="min", restore_best_weights=True)
         sv = keras.callbacks.ModelCheckpoint(
             checkpoint_filepath, monitor='val_loss', verbose=1, save_best_only=True,
             save_weights_only=False, mode='auto', save_freq='epoch',
