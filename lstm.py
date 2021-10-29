@@ -51,7 +51,7 @@ except ValueError: # detect GPU(s) and enable mixed precision
     policy = tf.keras.mixed_precision.experimental.Policy('mixed_float16')
     tf.config.optimizer.set_jit(True) # XLA compilation
     tf.keras.mixed_precision.experimental.set_policy(policy)
-    BATCH_SIZE = 1024
+    BATCH_SIZE = 1280
     print('Mixed precision enabled')
 print("REPLICAS: ", strategy.num_replicas_in_sync)
 
